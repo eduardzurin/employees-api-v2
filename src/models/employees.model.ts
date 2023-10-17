@@ -3,6 +3,8 @@ import { ResourceNotFoundError } from "../errors/resource-not-found";
 import { EmployeeBodyType, searchQueryType } from "../routes/schemas";
 import { Tribe } from "./tribes.model";
 
+const EMPLOYEES_REPORT_CACHE_KEY = "employeesReport";
+
 interface EmployeeDTO {
   id: number;
   name: string;
@@ -53,7 +55,7 @@ export async function getEmployees(
     );
 
   if (searchQuery.name)
-    employeesQuery.whereILike("employees.name", `%${searchQuery.name}%`);
+    employeesQuery.whereLike("employees.name", `%${searchQuery.name}%`);
   if (searchQuery.title)
     employeesQuery.where({ "employees.title": searchQuery.title });
   if (searchQuery.tribe)
@@ -93,8 +95,10 @@ export async function createEmployee(
   employee: EmployeeBodyType
 ) {
   await fastify.db.from(TABLE_NAME).insert(employee);
+  await fastify.cache.del(EMPLOYEES_REPORT_CACHE_KEY);
 }
 
 export async function deleteEmployee(fastify: FastifyInstance, id: number) {
   await fastify.db.from(TABLE_NAME).where({ id }).del();
+  await fastify.cache.del(EMPLOYEES_REPORT_CACHE_KEY);
 }

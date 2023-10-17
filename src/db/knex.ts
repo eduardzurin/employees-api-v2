@@ -2,7 +2,7 @@ import knex, { Knex } from "knex";
 import path from "path";
 import fileKnexConfigs from "../../knexconfig";
 
-type envType = "development" | "production";
+type envType = "development" | "production" | "test";
 const env = (process.env.ENVIRONMENT as envType) ?? "development";
 
 function getKnexConfig() {
